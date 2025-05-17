@@ -23,7 +23,6 @@
         <telegrambots.version>6.5.0</telegrambots.version>
         <spring-boot.version>3.2.3</spring-boot.version>
 
-        <hibernate.version>8.0.0.Final</hibernate.version>
         <glassfish.version>4.0.2</glassfish.version>
         <postgresql.version>42.6.0</postgresql.version>
         <json.version>20231013</json.version>
@@ -72,7 +71,7 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>${hibernate.version}</version>
+            <version>8.0.0.Final</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
