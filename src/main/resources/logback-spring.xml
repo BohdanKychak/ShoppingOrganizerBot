@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="LOG_PATH" value="logs" />
+    <property name="APP_NAME" value="shoppingOrganizerBot" />
+
+    <!-- Log format -->
+    <encoder name="STD_ENCODER">
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+
+    <!-- Console appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File appender with monthly rotation -->
+    <appender name="MONTHLY_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Archive by month -->
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-%d{yyyy-MM}.log</fileNamePattern>
+            <!-- Keep for the last 12 months only -->
+            <maxHistory>12</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+
+        <encoder>
+            <!-- Log level selection -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Log level for the entire application -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="MONTHLY_FILE" />
+    </root>
+
+</configuration>
