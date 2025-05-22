@@ -1,4 +1,4 @@
-package org.example.model;
+package org.example.model.helper;
 
 import java.util.ArrayDeque;
 

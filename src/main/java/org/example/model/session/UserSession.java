@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.model.SessionPathDeque;
+import org.example.model.helper.SessionPathDeque;
 import org.example.model.entity.UserData;
 import org.example.service.support.PropertiesService;
 

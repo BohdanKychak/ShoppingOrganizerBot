@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.example.helper.keyboard.InlineCommandHelper;
 import org.example.helper.keyboard.ReplyKeyboardHelper;
-import org.example.model.SessionPathDeque;
+import org.example.model.helper.SessionPathDeque;
 import org.example.model.entity.FamilyData;
 import org.example.model.entity.UserData;
 import org.example.model.session.UserSession;

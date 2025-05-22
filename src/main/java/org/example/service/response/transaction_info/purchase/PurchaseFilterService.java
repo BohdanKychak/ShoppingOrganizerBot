@@ -157,7 +157,7 @@ public class PurchaseFilterService {
         session.getPath().push(DATE.getCode());
         Message message = sendMessageService
                 .sendMessageNotSaveMessage(session.getChatId(),
-                        getMessage(FILTER_DATE_SIMPLIFICATION_BUTTONS, session.getLocale()),
+                        getMessage(FILTER_DATE_SIMPLIFICATION_BUTTONS_MESSAGE, session.getLocale()),
                         replyKeyboardHelper.buildKeyboardTwoPerLine(null,
                                 getSimplificationButtons()
                         )
@@ -473,7 +473,7 @@ public class PurchaseFilterService {
 
     private void incorrectData(UserSession session) {
         sendMessageService.sendMessageNotSaveMessage(session.getChatId(),
-                ENTERED_DATA_INCORRECT, session.getLocale());
+                ENTERED_DATA_INCORRECT_MESSAGE, session.getLocale());
     }
 
     private boolean isReadyToFilter(UserSession session) {
@@ -486,7 +486,7 @@ public class PurchaseFilterService {
 
     private void emptyFilter(UserSession session) {
         sendMessageService.sendMessage(
-                session.getChatId(), FILTER_CRITERIA_NO_SET, session.getLocale(),
+                session.getChatId(), FILTER_CRITERIA_NO_SET_MESSAGE, session.getLocale(),
                 inlineCommandHelper.buildInlineKeyboard(session.getLocale(),
                         List.of(PURCHASES_INFO_BUTTON, PURCHASES_FILTER_BUTTON))
         );

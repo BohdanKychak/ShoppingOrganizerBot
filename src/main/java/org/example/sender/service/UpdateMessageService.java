@@ -80,9 +80,13 @@ public class UpdateMessageService {
             if (e.getApiResponse().equals("Bad Request: message can't be deleted for everyone")) {
                 updateKeyboard(chatId, messageId, null);
                 log.debug("Keyboard deleted message {}", e.getMessage());
-            } else {
-                log.warn("Failed to delete message (API issue): {}", e.getMessage());
+                return;
             }
+            if (e.getApiResponse().equals("Bad Request: message to delete not found")) {
+                log.info("Message {} to delete not found", messageId);
+                return;
+            }
+            log.warn("Failed to delete message (API issue): {}", e.getMessage());
         } catch (TelegramApiException e) {
             log.warn("Failed to delete message (General error): {}", e.getMessage());
         }

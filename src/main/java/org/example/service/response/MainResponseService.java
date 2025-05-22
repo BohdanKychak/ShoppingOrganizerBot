@@ -22,7 +22,7 @@ import static org.example.util.MessageProperties.MAIN_MENU_MESSAGE;
 import static org.example.util.MessageProperties.MAIN_PROFILE_MESSAGE;
 import static org.example.util.MessageProperties.RESTART_BOT_MESSAGE;
 import static org.example.util.MessageProperties.TEMPORARY_MESSAGE_WAIT_MESSAGE;
-import static org.example.util.MessageProperties.TRANSACTION_SEARCH_STOPPED;
+import static org.example.util.MessageProperties.TRANSACTION_SEARCH_STOPPED_MESSAGE;
 
 @Slf4j
 @Component
@@ -65,7 +65,7 @@ public class MainResponseService {
             log.info("Stop purchase filter for chatId: {}", userSession.getChatId());
             updateMessageService.editInlineMessage(
                     userSession.getChatId(), userSession.getLastMessageId(),
-                    userSession.getLocale(), TRANSACTION_SEARCH_STOPPED
+                    userSession.getLocale(), TRANSACTION_SEARCH_STOPPED_MESSAGE
             );
         }
         log.info("Clear all temporary data and redirect to main for user {}", userSession.getChatId());
