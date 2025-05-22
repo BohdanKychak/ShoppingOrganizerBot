@@ -251,7 +251,7 @@ public class MoneyTransactionService {
                         .buildInlineKeyboard(session.getLocale(), SKIP_PURCHASE_DETAILS_BUTTON)
         );
         sendMessageService.sendMessageNotSaveMessage(session.getChatId(),
-                PURCHASE_ADD_DESCRIPTION_REPLY, session.getLocale(),
+                PURCHASE_ADD_DESCRIPTION_REPLY_MESSAGE, session.getLocale(),
                 replyKeyboardHelper.buildKeyboardTwoPerLine(session.getLocale(), SIMPLE_DESCRIPTION_OPTIONS)
         );
     }
