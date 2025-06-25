@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class TelegramBotConfig {
     private String token;
     private String username;
+    private String domain; // webhook domain
     private String path; // webhook path
     private String mode; // "webhook" or "polling"
 }
