@@ -44,5 +44,3 @@ public class TelegramWebhookBot extends org.telegram.telegrambots.bots.TelegramW
         return config.getPath();
     }
 }
-
-
