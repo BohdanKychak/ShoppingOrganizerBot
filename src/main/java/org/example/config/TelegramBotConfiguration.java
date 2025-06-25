@@ -19,7 +19,7 @@ public class TelegramBotConfiguration {
     @Bean
     public SetWebhook setWebhook(TelegramBotConfig config) {
         return SetWebhook.builder()
-                .url(config.getPath())
+                .url(config.getDomain() + config.getPath())
                 .build();
     }
 
