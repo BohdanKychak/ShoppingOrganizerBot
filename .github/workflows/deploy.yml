@@ -3,7 +3,7 @@ name: CI/CD Deploy
 on:
   push:
     branches:
-      - SOBT-6_Adapt-the-bot-to-work-in-webhook-mode
+      - task/SOBT-6_Adapt-the-bot-to-work-in-webhook-mode
 
 jobs:
   deploy:
