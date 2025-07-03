@@ -3,7 +3,7 @@ name: CI/CD Deploy
 on:
   push:
     branches:
-      - task/SOBT-6_Adapt-the-bot-to-work-in-webhook-mode
+      - master
 
 jobs:
   deploy:
@@ -26,6 +26,10 @@ jobs:
         ssh -i ~/.ssh/id_ed25519 ubuntu@152.67.75.202 << 'EOF'
           cd /home/ubuntu/ShoppingOrganizerBot
           git pull origin master
-          mvn -X clean install
+          mvn clean install
           sudo systemctl restart shoppingbot
         EOF
+
+    - name: Checking the bot launch
+      run: |
+        ssh -i ~/.ssh/id_ed25519 ubuntu@152.67.75.202 'sudo systemctl status shoppingbot --no-pager'
