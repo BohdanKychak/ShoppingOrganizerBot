@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
     - name: Checkout code
@@ -25,6 +26,6 @@ jobs:
         ssh -i ~/.ssh/id_ed25519 ubuntu@152.67.75.202 << 'EOF'
           cd /home/ubuntu/ShoppingOrganizerBot
           git pull origin master
-          mvn clean install
+          mvn -X clean install
           sudo systemctl restart shoppingbot
         EOF
