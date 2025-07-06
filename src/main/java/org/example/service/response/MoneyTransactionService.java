@@ -11,6 +11,7 @@ import org.example.helper.keyboard.ReplyKeyboardHelper;
 import org.example.model.entity.Income;
 import org.example.model.entity.Purchase;
 import org.example.model.entity.UserData;
+import org.example.model.helper.DualCurrencyTransaction;
 import org.example.model.session.UserSession;
 import org.example.model.session.purchase.PurchaseCreation;
 import org.example.repository.FamilyDataRepository;
@@ -195,15 +196,14 @@ public class MoneyTransactionService {
         updateMessageService.updateKeyboard(
                 session.getChatId(), session.getLastMessageId(), null);
         String[] transactionData = purchaseString.split(SEPARATOR);
-        Pattern pattern = Pattern.compile(MONEY_TRANSACTION_PATTERN);
 
         try {
             if (transactionData.length == 1) {
                 ///for_spent one_currency
-                purchaseForSpentOneCurrency(session, purchaseString, pattern);
+                purchaseForSpentOneCurrency(session, purchaseString);
             } else if (transactionData.length == 2) {
                 ////for_spent two_currencies
-                purchaseForSpentTwoCurrencies(session, pattern, transactionData);
+                purchaseForSpentTwoCurrencies(session, transactionData);
             } else {
                 throw new Exception();
             }
@@ -251,7 +251,7 @@ public class MoneyTransactionService {
                         .buildInlineKeyboard(session.getLocale(), SKIP_PURCHASE_DETAILS_BUTTON)
         );
         sendMessageService.sendMessageNotSaveMessage(session.getChatId(),
-                PURCHASE_ADD_DESCRIPTION_REPLY, session.getLocale(),
+                PURCHASE_ADD_DESCRIPTION_REPLY_MESSAGE, session.getLocale(),
                 replyKeyboardHelper.buildKeyboardTwoPerLine(session.getLocale(), SIMPLE_DESCRIPTION_OPTIONS)
         );
     }
@@ -350,8 +350,10 @@ public class MoneyTransactionService {
     }
 
     private void purchaseForSpentOneCurrency(
-            UserSession session, String purchaseString, Pattern pattern
+            UserSession session, String purchaseString
     ) throws Exception {
+        Pattern pattern = Pattern.compile(MONEY_TRANSACTION_PATTERN);
+
         Matcher matcher = pattern.matcher(purchaseString.trim());
         if (!matcher.matches()) {
             log.debug("Failed to parse purchase string for one currency: '{}', userId: {}",
@@ -373,8 +375,39 @@ public class MoneyTransactionService {
     }
 
     private void purchaseForSpentTwoCurrencies(
-            UserSession session, Pattern pattern, String[] transactionData
+            UserSession session, String[] transactionData
     ) throws Exception {
+        DualCurrencyTransaction transaction =
+                getDualCurrencyTransaction(session, transactionData);
+        double amount1 = transaction.getConvertibleAmount();
+        double amount2 = transaction.getConvertedAmount();
+        Currency currency1 = transaction.getConvertibleCurrency();
+        Currency currency2 = transaction.getConvertedCurrency();
+
+        double changeAmount = currency1.equals(currency2) ? amount1
+                : exchangeRateService.getConvertCurrency(amount1, currency1.getCode(), currency2.getCode());
+        changeAmount -= amount2;
+
+        if (changeAmount < 0) {
+            log.debug("Change after currency conversion is negative. userId: {}, change: {}",
+                    session.getChatId(), changeAmount);
+            throw new AmountException();
+        }
+
+        log.info("Processing two-currency purchase. amount1: {}, currency1: {}, amount2: {}, currency2: {}, change: {}, userId: {}",
+                amount1, currency1.getUsed(), amount2, currency2.getUsed(), changeAmount, session.getChatId());
+
+        takeMoney(session, amount1, currency1);
+        accountService.addMoneyToAccount(changeAmount, currency2, session.getFamilyId());
+        session.getTransactionSession().setPurchaseCreation(
+                new PurchaseCreation(amount2, currency2.getUsed()));
+    }
+
+    public DualCurrencyTransaction getDualCurrencyTransaction(
+            UserSession session, String[] transactionData
+    ) throws Exception {
+        Pattern pattern = Pattern.compile(MONEY_TRANSACTION_PATTERN);
+
         Matcher matcher1 = pattern.matcher(transactionData[0].trim());
         Matcher matcher2 = pattern.matcher(transactionData[1].trim());
 
@@ -402,24 +435,7 @@ public class MoneyTransactionService {
             throw new CurrencyNotExistException();
         }
 
-        double changeAmount = currency1.equals(currency2) ? amount1
-                : exchangeRateService.getConvertCurrency(amount1, currency1.getCode(), currency2.getCode());
-        changeAmount -= amount2;
-
-        if (changeAmount < 0) {
-            log.debug("Change after currency conversion is negative. userId: {}, change: {}",
-                    session.getChatId(), changeAmount);
-            throw new AmountException();
-        }
-
-        log.info("Processing two-currency purchase. amount1: {}, currency1: {}, amount2: {}, currency2: {}, change: {}, userId: {}",
-                amount1, currency1.getUsed(), amount2, currency2.getUsed(), changeAmount, session.getChatId());
-
-        takeMoney(session, amount1, currency1);
-        accountService.addMoneyToAccount(changeAmount, currency2, session.getFamilyId());
-        saveIncome(session, "change", changeAmount, currency2);
-        session.getTransactionSession().setPurchaseCreation(
-                new PurchaseCreation(amount2, currency2.getUsed()));
+        return new DualCurrencyTransaction(amount1, currency1, amount2, currency2);
     }
 
     private void workWithIncomeTransaction(UserSession session, Matcher matcher) throws Exception {

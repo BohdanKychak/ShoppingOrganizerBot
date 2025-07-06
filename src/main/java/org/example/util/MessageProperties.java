@@ -59,7 +59,7 @@ public final class MessageProperties {
     public static final String PURCHASE_RECEIPT_UPDATED_MESSAGE = "purchase.receipt.updated";
     public static final String PURCHASE_DETAILS_NO_ADDED_MESSAGE = "purchase.details.no-added";
     public static final String PURCHASE_ADD_DESCRIPTION_WRITE__FORMAT_MESSAGE = "purchase.add.description.write_format";
-    public static final String PURCHASE_ADD_DESCRIPTION_REPLY = "purchase.add.description.reply";
+    public static final String PURCHASE_ADD_DESCRIPTION_REPLY_MESSAGE = "purchase.add.description.reply";
     public static final String PURCHASE_ADD_RECEIPT_MESSAGE = "purchase.add.receipt";
     public static final String PURCHASE_DESCRIPTION_LONGER__FORMAT_MESSAGE = "purchase.description.longer_format";
     public static final String PURCHASE_NEGATIVE_ACCOUNT__FORMAT_MESSAGE = "purchase.negative.account_format";
@@ -91,7 +91,7 @@ public final class MessageProperties {
     public static final String WAIT_PROCESS_FINISH_MESSAGE = "wait.process.finish";
     public static final String SOMETHING_WENT_WRONG_MESSAGE = "something.went.wrong";
     public static final String IN_DEVELOPMENT_MESSAGE = "in.development";
-    public static final String ENTERED_DATA_INCORRECT = "entered.data.incorrect";
+    public static final String ENTERED_DATA_INCORRECT_MESSAGE = "entered.data.incorrect";
     public static final String PICTURE_NOT_AVAILABLE_MESSAGE = "picture.not.available";
     public static final String TRANSACTION_CANCELED_MESSAGE = "transaction.canceled";
 
@@ -118,14 +118,14 @@ public final class MessageProperties {
     public static final String TRANSACTION_DELETE_REQUEST__FORMAT_MESSAGE = "transaction.delete.request_format";
     public static final String TRANSACTIONS_INFO_MESSAGE = "transactions.info";
 
-    public static final String TRANSACTION_SEARCH_STOPPED = "transaction.search.stopped";
+    public static final String TRANSACTION_SEARCH_STOPPED_MESSAGE = "transaction.search.stopped";
     public static final String FILTER_MENU_MESSAGE = "transaction.filter.menu";
     public static final String FILTER_MENU_USER_MESSAGE = "filter.menu.user";
     public static final String FILTER_MENU_AMOUNT_MESSAGE = "filter.menu.amount";
     public static final String FILTER_MENU_DATE_MESSAGE = "filter.menu.date";
     public static final String FILTER_MENU_CURRENCY_MESSAGE = "filter.menu.currency";
-    public static final String FILTER_DATE_SIMPLIFICATION_BUTTONS = "filter.date.simplification.buttons";
-    public static final String FILTER_CRITERIA_NO_SET = "filter.criteria.no-set";
+    public static final String FILTER_DATE_SIMPLIFICATION_BUTTONS_MESSAGE = "filter.date.simplification.buttons";
+    public static final String FILTER_CRITERIA_NO_SET_MESSAGE = "filter.criteria.no-set";
     public static final String GENERATE_TABLE_PROCESS_MESSAGE = "generate.table.process";
 
 }
