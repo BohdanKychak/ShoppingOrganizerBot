@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter;
 
 public final class Constants {
 
-    public static final String BOT_TAG = "@ShoppingOrganizerBot";
+    public static final String BOT_TAG_FORMAT = "@%s";
 
     public static final String PATH_TO_LANG_PROPERTIES = "lang";
     public static final String PATH_TO_LANG_MESSAGES = PATH_TO_LANG_PROPERTIES + "/messages/messages";

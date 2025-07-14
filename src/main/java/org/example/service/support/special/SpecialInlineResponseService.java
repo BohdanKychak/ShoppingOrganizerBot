@@ -397,7 +397,8 @@ public class SpecialInlineResponseService {
         sendMessageService.sendMessageWithExpirationDate(
                 userSession.getChatId(),
                 BOT_INFO__FORMAT_MESSAGE,
-                List.of(BOT_TAG, getFullPass(), getFamilyCode(userSession.getFamilyId())),
+                List.of(String.format(BOT_TAG_FORMAT, botName),
+                        getFullPass(), getFamilyCode(userSession.getFamilyId())),
                 userSession.getLocale(),
                 getBotInfoButtons(userSession)
         );
