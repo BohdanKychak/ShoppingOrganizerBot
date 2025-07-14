@@ -8,7 +8,6 @@ import org.example.model.SessionPathDeque;
 import org.example.model.entity.FamilyData;
 import org.example.model.entity.UserData;
 import org.example.model.session.UserSession;
-import org.example.model.session.purchase.PurchaseCreation;
 import org.example.repository.FamilyDataRepository;
 import org.example.repository.UserDataRepository;
 import org.example.sender.service.SendMessageService;
@@ -66,9 +65,6 @@ public class FamilySettingsService {
 
     @Autowired
     private MainResponseService mainResponseService;
-
-    @Autowired
-    private AccountService accountService;
 
     @SuppressWarnings("unused")
     @Value("${telegram.bot.username}")
@@ -269,20 +265,10 @@ public class FamilySettingsService {
         log.info("Start removing family member {} from family {}", memberId, familyId);
         sendMessageService.sendMessage(memberId,
                 FAMILY_REMOVED_MESSAGE, memberSession.getLocale());
-        boolean memberIsBusy = memberSession.isBusy();
-        PurchaseCreation purchase = memberSession
-                .getTransactionSession().getPurchaseCreation();
         sendMessageService.sendMessage(memberId,
                 WAIT_PROCESS_FINISH_MESSAGE, memberSession.getLocale());
         leaveFamily(memberSession, memberSession.getLastMessageId(), false);
         log.info("Family member {} has been removed from family {}", memberId, familyId);
-
-        if (memberIsBusy && purchase != null) {
-            log.info("Forcefully end the transaction of a deleted family member {}", memberId);
-            accountService.addMoneyToAccount(purchase.getAmount(),
-                    purchase.getCurrency(), familyId);
-            memberSession.getTransactionSession().clearPurchaseCreation();
-        }
     }
 
     private static Long getMemberId(UserSession session, String code) {

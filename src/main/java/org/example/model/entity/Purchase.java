@@ -53,7 +53,7 @@ public class Purchase {
 
     public Purchase(PurchaseCreation purchaseCreation, Long familyId, Long chatId) {
         this.amount = purchaseCreation.getAmount();
-        this.currency = purchaseCreation.getCurrency();
+        this.currency = purchaseCreation.getCurrency().getUsed();
         this.description = purchaseCreation.getDescription();
         this.simpleDescription = purchaseCreation.getSimpleDescription();
         this.receiptPhotoId = purchaseCreation.getReceiptPhotoId();

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -307,17 +308,42 @@ public class MoneyTransactionService {
     }
 
     private void endOfPurchase(UserSession session, String status) {
-        Purchase purchase = new Purchase(
-                session.getTransactionSession().getPurchaseCreation(),
-                session.getFamilyId(),
-                session.getChatId()
-        );
-        log.debug("Save purchase {} for family {}", purchase, session.getFamilyId());
-        purchaseRepository.save(purchase);
+        try {
+            PurchaseCreation purchaseCreation = session.getTransactionSession().getPurchaseCreation();
+            takeMoney(session.getFamilyId(),
+                    purchaseCreation.getAmount(), purchaseCreation.getCurrency());
+            if (purchaseCreation.getSecondAmount() != null) {
+                accountService.addMoneyToAccount(purchaseCreation.getSecondAmount(),
+                        purchaseCreation.getSecondCurrency().getUsed(), session.getFamilyId());
+                saveIncome(session, "change",
+                        purchaseCreation.getSecondAmount(), purchaseCreation.getSecondCurrency());
+            }
+            Purchase purchase = new Purchase(
+                    purchaseCreation,
+                    session.getFamilyId(),
+                    session.getChatId()
+            );
+
+            log.debug("Save purchase {} for family {}", purchase, session.getFamilyId());
+            purchaseRepository.save(purchase);
+            sendMessageService.sendMessage(session.getChatId(), status, session.getLocale());
+            sendMessageService.sendMessage(session.getChatId(),
+                    PURCHASE_ADDED_MESSAGE, session.getLocale());
+        } catch (NegativeAccountException e) {
+            log.warn("Family {} has negative account", session.getFamilyId());
+            sendMessageService.sendMessage(session.getChatId(),
+                    EXCEPTION_NEGATIVE_ACCOUNT_MESSAGE, session.getLocale());
+            toMain(session);
+        } catch (AccountNotExistException e) {
+            log.warn("Family {} has no such account", session.getFamilyId());
+            sendMessageService.sendMessage(session.getChatId(),
+                    EXCEPTION_ACCOUNT_NOT_EXIST_MESSAGE, session.getLocale());
+            sendTryAgainMessage(PURCHASE_LOG_EXCEPTION, e, session, PURCHASE_NO_ADDED_MESSAGE);
+        } catch (Exception e) {
+            log.warn("The entered purchase data is invalid from user {}", session.getChatId());
+            sendTryAgainMessage(PURCHASE_LOG_EXCEPTION, e, session, PURCHASE_NO_ADDED_MESSAGE);
+        }
         session.getTransactionSession().clearPurchaseCreation();
-        sendMessageService.sendMessage(session.getChatId(), status, session.getLocale());
-        sendMessageService.sendMessage(session.getChatId(),
-                PURCHASE_ADDED_MESSAGE, session.getLocale());
         endOfTransaction(session);
     }
 
@@ -365,11 +391,11 @@ public class MoneyTransactionService {
             log.debug("Currency not found for '{}', userId: {}", matcher.group(3), session.getChatId());
             throw new CurrencyNotExistException();
         }
+        accountService.checkAccount(currency, session.getFamilyId());
 
         log.info("Processing one-currency purchase. Amount: {}, Currency: {}, userId: {}",
                 amount, currency.getUsed(), session.getChatId());
-        takeMoney(session, amount, currency);
-        session.getTransactionSession().setPurchaseCreation(new PurchaseCreation(amount, currency.getUsed()));
+        session.getTransactionSession().setPurchaseCreation(new PurchaseCreation(amount, currency));
     }
 
     private void purchaseForSpentTwoCurrencies(
@@ -387,12 +413,6 @@ public class MoneyTransactionService {
         double amount1 = Double.parseDouble(matcher1.group(1).replace(COMA, POINT));
         double amount2 = Double.parseDouble(matcher2.group(1).replace(COMA, POINT));
 
-        if (amount1 < amount2) {
-            log.debug("Invalid transaction amounts: amount1 < amount2 ({} < {}), userId: {}",
-                    amount1, amount2, session.getChatId());
-            throw new AmountException("Amount1 less than Amount2");
-        }
-
         Set<String> familyCurrencies = getFamilyCurrencies(session.getFamilyId());
         Currency currency1 = getCurrency(matcher1.group(3), familyCurrencies);
         Currency currency2 = getCurrency(matcher2.group(3), familyCurrencies);
@@ -401,6 +421,7 @@ public class MoneyTransactionService {
                     matcher1.group(3), matcher2.group(3), session.getChatId());
             throw new CurrencyNotExistException();
         }
+        accountService.checkAccount(currency1, session.getFamilyId());
 
         double changeAmount = currency1.equals(currency2) ? amount1
                 : exchangeRateService.getConvertCurrency(amount1, currency1.getCode(), currency2.getCode());
@@ -414,12 +435,8 @@ public class MoneyTransactionService {
 
         log.info("Processing two-currency purchase. amount1: {}, currency1: {}, amount2: {}, currency2: {}, change: {}, userId: {}",
                 amount1, currency1.getUsed(), amount2, currency2.getUsed(), changeAmount, session.getChatId());
-
-        takeMoney(session, amount1, currency1);
-        accountService.addMoneyToAccount(changeAmount, currency2, session.getFamilyId());
-        saveIncome(session, "change", changeAmount, currency2);
         session.getTransactionSession().setPurchaseCreation(
-                new PurchaseCreation(amount2, currency2.getUsed()));
+                new PurchaseCreation(amount1, currency1, changeAmount, currency2));
     }
 
     private void workWithIncomeTransaction(UserSession session, Matcher matcher) throws Exception {
@@ -453,13 +470,13 @@ public class MoneyTransactionService {
 
     private double getNewAmountOfAccount(UserSession session, String description, double amount, Currency currency) {
         log.debug("Save income {}{} for family {}", amount, currency, session.getFamilyId());
-        saveIncome(session, description, amount, currency);
+        saveIncome(session, description, new BigDecimal(amount), currency);
 
         return accountService.addMoneyToAccount(
                 amount, currency, session.getFamilyId());
     }
 
-    private void saveIncome(UserSession session, String description, double amount, Currency currency) {
+    private void saveIncome(UserSession session, String description, BigDecimal amount, Currency currency) {
         Income income;
         if (description == null || description.isEmpty()) {
             income = new Income(amount, currency.getUsed(), session);
@@ -470,15 +487,15 @@ public class MoneyTransactionService {
         incomeRepository.save(income);
     }
 
-    private void takeMoney(UserSession session, double amount1, Currency currency1)
+    private void takeMoney(Long familyId, BigDecimal amount, Currency currency)
             throws AccountNotExistException, NegativeArraySizeException {
         double newAmountOfFirstCurrencyAccount =
                 accountService.takeMoneyFromAccount(
-                        amount1, currency1, session.getFamilyId());
+                        amount.doubleValue(), currency, familyId);
         if (newAmountOfFirstCurrencyAccount < 0) {
-            log.warn("family{} has money less than 0", session.getFamilyId());
-            callAllFamily(session.getFamilyId(),
-                    List.of(currency1.getFullName()));
+            log.warn("family{} has money less than 0", familyId);
+            callAllFamily(familyId,
+                    List.of(currency.getFullName()));
         }
     }
 
