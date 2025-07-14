@@ -1,6 +1,7 @@
 package org.example.model.session.purchase;
 
 import lombok.Getter;
+import org.example.enums.Currency;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,7 +11,11 @@ public class PurchaseCreation {
 
     private final BigDecimal amount;
 
-    private final String currency;
+    private final Currency currency;
+
+    private final BigDecimal secondAmount;
+
+    private final Currency secondCurrency;
 
     private String description;
 
@@ -20,9 +25,19 @@ public class PurchaseCreation {
 
     private String receiptPhotoId;
 
-    public PurchaseCreation(Double amount, String currency) {
+    public PurchaseCreation(Double amount, Currency currency) {
         this.amount = new BigDecimal(amount).setScale(2, RoundingMode.HALF_UP);
         this.currency = currency;
+        this.secondAmount = null;
+        this.secondCurrency = null;
+        this.hasDescription = null;
+    }
+
+    public PurchaseCreation(Double amount1, Currency currency1, Double amount2, Currency currency2) {
+        this.amount = new BigDecimal(amount1).setScale(2, RoundingMode.HALF_UP);
+        this.currency = currency1;
+        this.secondAmount = new BigDecimal(amount2).setScale(2, RoundingMode.HALF_UP);
+        this.secondCurrency = currency2;
         this.hasDescription = null;
     }
 
