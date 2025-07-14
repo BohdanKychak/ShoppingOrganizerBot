@@ -95,13 +95,20 @@ public class AccountService {
         return newAmount;
     }
 
-    public double takeMoneyFromAccount(double amount, Currency currency, Long familyId)
+    public Account checkAccount(Currency currency, Long familyId)
             throws AccountNotExistException, NegativeAccountException {
         Optional<Account> oAccount = accountRepository
                 .findAccountByFamilyIdAndCurrency(familyId, currency.getUsed());
         if (oAccount.isEmpty()) throw new AccountNotExistException();
         Account account = oAccount.get();
         if (account.getAccountAmount().compareTo(BigDecimal.ZERO) < ZERO) throw new NegativeAccountException();
+
+        return account;
+    }
+
+    public double takeMoneyFromAccount(double amount, Currency currency, Long familyId)
+            throws AccountNotExistException, NegativeAccountException {
+        Account account = checkAccount(currency, familyId);
 
         double newAmount = account.getAccountAmount().doubleValue() - amount;
         accountRepository.updateAmountById(account.getAccountId(),

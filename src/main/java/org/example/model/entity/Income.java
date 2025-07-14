@@ -42,8 +42,8 @@ public class Income {
     @NotNull
     private Long userId;
 
-    public Income(Double amount, String currency, String description, UserSession session) {
-        this.amount = new BigDecimal(amount);
+    public Income(BigDecimal amount, String currency, String description, UserSession session) {
+        this.amount = amount;
         this.currency = currency;
         this.description = description;
         this.timeIncome = LocalDateTime.now();
@@ -51,8 +51,8 @@ public class Income {
         this.userId = session.getChatId();
     }
 
-    public Income(Double amount, String currency, UserSession session) {
-        this.amount = new BigDecimal(amount);
+    public Income(BigDecimal amount, String currency, UserSession session) {
+        this.amount = amount;
         this.currency = currency;
         this.description = null;
         this.timeIncome = LocalDateTime.now();
